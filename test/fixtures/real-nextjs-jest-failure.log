@@ -1,0 +1,82 @@
+2026-10-26T21:44:52.7829304Z   NEXT_TEST_PROXY_ADDRESS: 
+2026-10-26T21:44:52.7829630Z   NEXT_TURBOPACK_IO_CONCURRENCY: 64
+2026-10-26T21:44:52.7829951Z   BASELINE_BROWSER_MAPPING_IGNORE_OLD_DATA: 1
+2026-10-26T21:44:52.7830835Z   TURBO_TOKEN: ***
+2026-10-26T21:44:52.7831124Z ##[endgroup]
+2026-10-26T21:44:52.8154138Z /etc/profile.d/apps-bin-path.sh: line 10: XDG_DATA_DIRS: unbound variable
+2026-10-26T21:44:52.8251365Z   % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+2026-10-26T21:44:52.8251915Z                                  Dload  Upload  Total   Spent   Left   Speed
+2026-10-26T21:45:31.5351769Z ##[group]Run export __NEXT_EXPERIMENTAL_STRICT_ROUTE_TYPES=true
+2026-10-26T21:45:31.5352283Z [36;1mexport __NEXT_EXPERIMENTAL_STRICT_ROUTE_TYPES=true[0m
+2026-10-26T21:45:31.5352654Z [36;1mnode scripts/test-new-tests.mjs \[0m
+2026-10-26T21:45:31.5352959Z [36;1m  --flake-detection \[0m
+2026-10-26T21:45:31.5353224Z [36;1m  --mode start \[0m
+2026-10-26T21:45:31.5353469Z [36;1m  --group 1/5[0m
+2026-10-26T21:45:31.5387003Z shell: /usr/bin/bash -le {0}
+2026-10-26T21:45:31.5387275Z env:
+2026-10-26T21:45:47.9126242Z Stopped next server
+2026-10-26T21:45:47.9126474Z destroyed next instance: 238.004ms
+2026-10-26T21:45:47.9126996Z FAIL Turbopack test/e2e/app-dir/server-reference-tree-shaking/server-reference-tree-shaking.test.ts (9.428 s)
+2026-10-26T21:45:47.9127546Z   server-reference-tree-shaking
+2026-10-26T21:45:47.9127945Z     ✓ renders the used export from the use-server module (201 ms)
+2026-10-26T21:45:47.9128426Z     ✓ renders the used export from the use-cache module (12 ms)
+2026-10-26T21:45:47.9129028Z     ✕ tree shakes dependencies of an unused export containing an inline use-server function (2 ms)
+2026-10-26T21:45:47.9130354Z     ✕ tree shakes dependencies of an unused export containing an inline use-cache function (1 ms)
+2026-10-26T21:45:47.9130734Z 
+2026-10-26T21:45:47.9131248Z   ● server-reference-tree-shaking › tree shakes dependencies of an unused export containing an inline use-server function
+2026-10-26T21:45:47.9131714Z 
+2026-10-26T21:45:47.9131864Z     expect(received).toBe(expected) // Object.is equality
+2026-10-26T21:45:47.9132106Z 
+2026-10-26T21:45:47.9132199Z     Expected: false
+2026-10-26T21:45:47.9132416Z     Received: true
+2026-10-26T21:45:47.9132545Z 
+2026-10-26T21:45:47.9132769Z       40 |       // Verify that we scanned the application's output, not just runtime code.
+2026-10-26T21:45:47.9133256Z       41 |       expect(serverOutput).toContain(`${kind}: lightweight`)
+2026-10-26T21:45:47.9133737Z     > 42 |       expect(serverOutput.includes(`unused-${kind}-dependency`)).toBe(false)
+2026-10-26T21:45:47.9134197Z          |                                                                  ^
+2026-10-26T21:45:47.9134506Z       43 |     }
+2026-10-26T21:45:47.9134911Z       44 |   )
+2026-10-26T21:45:47.9135159Z       45 | })
+2026-10-26T21:45:47.9135277Z 
+2026-10-26T21:45:47.9135586Z       at toBe (e2e/app-dir/server-reference-tree-shaking/server-reference-tree-shaking.test.ts:42:66)
+2026-10-26T21:45:47.9135987Z 
+2026-10-26T21:45:47.9136497Z   ● server-reference-tree-shaking › tree shakes dependencies of an unused export containing an inline use-cache function
+2026-10-26T21:45:47.9136959Z 
+2026-10-26T21:45:47.9137108Z     expect(received).toBe(expected) // Object.is equality
+2026-10-26T21:45:47.9137348Z 
+2026-10-26T21:45:47.9137440Z     Expected: false
+2026-10-26T21:45:48.2481793Z 
+2026-10-26T21:45:48.2482100Z       at toBe (e2e/app-dir/server-reference-tree-shaking/server-reference-tree-shaking.test.ts:42:66)
+2026-10-26T21:45:48.2482500Z 
+2026-10-26T21:45:48.2482602Z Test Suites: 1 failed, 1 total
+2026-10-26T21:45:48.2482870Z Tests:       2 failed, 2 passed, 4 total
+2026-10-26T21:45:48.2483153Z Snapshots:   0 total
+2026-10-26T21:45:48.2483375Z Time:        9.945 s
+2026-10-26T21:45:48.2483877Z Ran all test suites matching /test\/e2e\/app-dir\/server-reference-tree-shaking\/server-reference-tree-shaking.test.ts/i.
+2026-10-26T21:45:48.2484767Z Test results written to: test/e2e/app-dir/server-reference-tree-shaking/server-reference-tree-shaking.test.ts.run-1.results.json
+2026-10-26T21:45:48.2486076Z Force exiting Jest: Have you considered using `--detectOpenHandles` to detect async operations that kept running after all tests finished?
+2026-10-26T21:45:48.2486924Z end of test/e2e/app-dir/server-reference-tree-shaking/server-reference-tree-shaking.test.ts (run 1/3) output
+2026-10-26T21:45:48.2487693Z ##[endgroup]
+2026-10-26T21:45:48.2488068Z ##[group]Result as JSON for tooling
+2026-10-26T21:45:48.2524596Z --test output start-- {"numFailedTestSuites":1,"numFailedTests":2,"numPassedTestSuites":0,"numPassedTests":2,"numPendingTestSuites":0,"numPendingTests":0,"numRuntimeErrorTestSuites":0,"numTodoTests":0,"numTotalTestSuites":1,"numTotalTests":4,"openHandles":[],"snapshot":{"added":0,"didUpdate":false,"failure":false,"filesAdded":0,"filesRemoved":0,"filesRemovedList":[],"filesUnmatched":0,"filesUpdated":0,"matched":0,"total":0,"unchecked":0,"uncheckedKeysByFile":[],"unmatched":0,"updated":0},"startTime":1793051138272,"success":false,"testResults":[{"assertionResults":[{"ancestorTitles":["server-reference-tree-shaking"],"duration":204,"failureDetails":[],"failureMessages":[],"fullName":"server-reference-tree-shaking renders the used export from the use-server module","invocations":1,"location":null,"numPassingAsserts":1,"retryReasons":[],"status":"passed","title":"renders the used export from the use-server module"},{"ancestorTitles":["server-reference-tree-shaking"],"duration":12,"failureDetails":[],"failureMessages":[],"fullName":"server-reference-tree-shaking renders the used export from the use-cache module","invocations":1,"location":null,"numPassingAsserts":1,"retryReasons":[],"status":"passed","title":"renders the used export from the use-cache module"},{"ancestorTitles":["server-reference-tree-shaking"],"duration":2,"failureDetails":[{"matcherResult":{"actual":true,"expected":false,"message":"expect(received).toBe(expected) // Object.is equality\n\nExpected: false\nReceived: true","name":"toBe","pass":false}}],"failureMessages":["Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: false\nReceived: true\n    at toBe (/home/runner/work/next.js/next.js/test/e2e/app-dir/server-reference-tree-shaking/server-reference-tree-shaking.test.ts:42:66)\n    at Object.<anonymous> (/home/runner/work/next.js/next.js/node_modules/.pnpm/jest-each@29.7.0/node_modules/jest-each/build/bind.js:81:13)\n    at Promise.then.completed (/home/runner/work/next.js/next.js/node_modules/.pnpm/jest-circus@29.7.0_babel-plugin-macros@3.1.0_supports-color@8.1.1/node_modules/jest-circus/build/utils.js:298:28)\n    at new Promise (<anonymous>)\n    at callAsyncCircusFn (/home/runner/work/next.js/next.js/node_modules/.pnpm/jest-circus@29.7.0_babel-plugin-macros@3.1.0_supports-color@8.1.1/node_modules/jest-circus/build/utils.js:231:10)\n    at _callCircusTest (/home/runner/work/next.js/next.js/node_modules/.pnpm/jest-circus@29.7.0_babel-plugin-macros@3.1.0_supports-color@8.1.1/node_modules/jest-circus/build/run.js:316:40)\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at _runTest (/home/runner/work/next.js/next.js/node_modules/.pnpm/jest-circus@29.7.0_babel-plugin-macros@3.1.0_supports-color@8.1.1/node_modules/jest-circus/build/run.js:252:3)\n    at _runTestsForDescribeBlock (/home/runner/work/next.js/next.js/node_modules/.pnpm/jest-circus@29.7.0_babel-plugin-macros@3.1.0_supports-color@8.1.1/node_modules/jest-circus/build/run.js:126:9)\n    at _runTestsForDescribeBlock (/home/runner/work/next.js/next.js/node_modules/.pnpm/jest-circus@29.7.0_babel-plugin-macros@3.1.0_supports-color@8.1.1/node_modules/jest-circus/build/run.js:121:9)\n    at run (/home/runner/work/next.js/next.js/node_modules/.pnpm/jest-circus@29.7.0_babel-plugin-macros@3.1.0_supports-color@8.1.1/node_modules/jest-circus/build/run.js:71:3)\n    at runAndTransformResultsToJestFormat (/home/runner/work/next.js/next.js/node_modules/.pnpm/jest-circus@29.7.0_babel-plugin-macros@3.1.0_supports-color@8.1.1/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)\n    at jestAdapter (/home/runner/work/next.js/next.js/node_modules/.pnpm/jest-circus@29.7.0_babel-plugin-macros@3.1.0_supports-color@8.1.1/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)\n    at runTestInternal (/home/runner/work/next.js/next.js/node_modules/.pnpm/jest-runner@29.7.0_supports-color@8.1.1/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/home/runner/work/next.js/next.js/node_modules/.pnpm/jest-runner@29.7.0_supports-color@8.1.1/node_modules/jest-runner/build/runTest.js:444:34)"],"fullName":"server-reference-tree-shaking tree shakes dependencies of an unused export containing an inline use-server function","invocations":1,"location":null,"numPassingAsserts":1,"retryReasons":[],"status":"failed","title":"tree shakes dependencies of an unused export containing an inline use-server function"},{"ancestorTitles":["server-reference-tree-shaking"],"duration":0,"failureDetails":[{"matcherResult":{"actual":true,"expected":false,"message":"expect(received).toBe(expected) // Object.is equality\n\nExpected: false\nReceived: true","name":"toBe","pass":false}}],"failureMessages":["Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: false\nReceived: true\n    at toBe (/home/runner/work/next.js/next.js/test/e2e/app-dir/server-reference-tree-shaking/server-reference-tree-shaking.test.ts:42:66)\n    at Object.<anonymous> (/home/runner/work/next.js/next.js/node_modules/.pnpm/jest-each@29.7.0/node_modules/jest-each/build/bind.js:81:13)\n    at Promise.then.completed (/home/runner/work/next.js/next.js/node_modules/.pnpm/jest-circus@29.7.0_babel-plugin-macros@3.1.0_supports-color@8.1.1/node_modules/jest-circus/build/utils.js:298:28)\n    at new Promise (<anonymous>)\n    at callAsyncCircusFn (/home/runner/work/next.js/next.js/node_modules/.pnpm/jest-circus@29.7.0_babel-plugin-macros@3.1.0_supports-color@8.1.1/node_modules/jest-circus/build/utils.js:231:10)\n    at _callCircusTest (/home/runner/work/next.js/next.js/node_modules/.pnpm/jest-circus@29.7.0_babel-plugin-macros@3.1.0_supports-color@8.1.1/node_modules/jest-circus/build/run.js:316:40)\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at _runTest (/home/runner/work/next.js/next.js/node_modules/.pnpm/jest-circus@29.7.0_babel-plugin-macros@3.1.0_supports-color@8.1.1/node_modules/jest-circus/build/run.js:252:3)\n    at _runTestsForDescribeBlock (/home/runner/work/next.js/next.js/node_modules/.pnpm/jest-circus@29.7.0_babel-plugin-macros@3.1.0_supports-color@8.1.1/node_modules/jest-circus/build/run.js:126:9)\n    at _runTestsForDescribeBlock (/home/runner/work/next.js/next.js/node_modules/.pnpm/jest-circus@29.7.0_babel-plugin-macros@3.1.0_supports-color@8.1.1/node_modules/jest-circus/build/run.js:121:9)\n    at run (/home/runner/work/next.js/next.js/node_modules/.pnpm/jest-circus@29.7.0_babel-plugin-macros@3.1.0_supports-color@8.1.1/node_modules/jest-circus/build/run.js:71:3)\n    at runAndTransformResultsToJestFormat (/home/runner/work/next.js/next.js/node_modules/.pnpm/jest-circus@29.7.0_babel-plugin-macros@3.1.0_supports-color@8.1.1/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)\n    at jestAdapter (/home/runner/work/next.js/next.js/node_modules/.pnpm/jest-circus@29.7.0_babel-plugin-macros@3.1.0_supports-color@8.1.1/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)\n    at runTestInternal (/home/runner/work/next.js/next.js/node_modules/.pnpm/jest-runner@29.7.0_supports-color@8.1.1/node_modules/jest-runner/build/runTest.js:367:16)\n    at runTest (/home/runner/work/next.js/next.js/node_modules/.pnpm/jest-runner@29.7.0_supports-color@8.1.1/node_modules/jest-runner/build/runTest.js:444:34)"],"fullName":"server-reference-tree-shaking tree shakes dependencies of an unused export containing an inline use-cache function","invocations":1,"location":null,"numPassingAsserts":1,"retryReasons":[],"status":"failed","title":"tree shakes dependencies of an unused export containing an inline use-cache function"}],"endTime":1793051148200,"message":"  ● server-reference-tree-shaking › tree shakes dependencies of an unused export containing an inline use-server function\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: false\n    Received: true\n\n      40 |       // Verify that we scanned the application's output, not just runtime code.\n      41 |       expect(serverOutput).toContain(`${kind}: lightweight`)\n    > 42 |       expect(serverOutput.includes(`unused-${kind}-dependency`)).toBe(false)\n         |                                                                  ^\n      43 |     }\n      44 |   )\n      45 | })\n\n      at toBe (e2e/app-dir/server-reference-tree-shaking/server-reference-tree-shaking.test.ts:42:66)\n\n  ● server-reference-tree-shaking › tree shakes dependencies of an unused export containing an inline use-cache function\n\n    expect(received).toBe(expected) // Object.is equality\n\n    Expected: false\n    Received: true\n\n      40 |       // Verify that we scanned the application's output, not just runtime code.\n      41 |       expect(serverOutput).toContain(`${kind}: lightweight`)\n    > 42 |       expect(serverOutput.includes(`unused-${kind}-dependency`)).toBe(false)\n         |                                                                  ^\n      43 |     }\n      44 |   )\n      45 | })\n\n      at toBe (e2e/app-dir/server-reference-tree-shaking/server-reference-tree-shaking.test.ts:42:66)\n","name":"/home/runner/work/next.js/next.js/test/e2e/app-dir/server-reference-tree-shaking/server-reference-tree-shaking.test.ts","startTime":1793051138437,"status":"failed","summary":""}],"wasInterrupted":false,"processEnv":{"NEXT_TEST_MODE":"start","NEXT_TEST_RUN_NUMBER":"1"}} --test output end--
+2026-10-26T21:45:48.2554924Z ##[endgroup]
+2026-10-26T21:45:48.2555134Z exiting with code 1
+2026-10-26T21:45:48.4128867Z Error: Command failed with exit code 1 (EPERM): node run-tests.js --retries 0 --runs 3 test/e2e/app-dir/server-reference-tree-shaking/server-reference-tree-shaking.test.ts
+2026-10-26T21:45:48.4129973Z     at makeError (/home/runner/work/next.js/next.js/node_modules/.pnpm/execa@2.0.3/node_modules/execa/lib/error.js:58:11)
+2026-10-26T21:45:48.4130898Z     at handlePromise (/home/runner/work/next.js/next.js/node_modules/.pnpm/execa@2.0.3/node_modules/execa/index.js:112:26)
+2026-10-26T21:45:48.4131593Z     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2026-10-26T21:45:48.4132193Z     at async main (file:///home/runner/work/next.js/next.js/scripts/test-new-tests.mjs:136:5) {
+2026-10-26T21:45:48.4132972Z   command: 'node run-tests.js --retries 0 --runs 3 test/e2e/app-dir/server-reference-tree-shaking/server-reference-tree-shaking.test.ts',
+2026-10-26T21:45:48.4133579Z   exitCode: 1,
+2026-10-26T21:45:48.4133845Z   exitCodeName: 'EPERM',
+2026-10-26T21:45:48.4134088Z   stdout: undefined,
+2026-10-26T21:45:48.4134310Z   stderr: undefined,
+2026-10-26T21:45:48.4134538Z   failed: true,
+2026-10-26T21:45:48.4134745Z   timedOut: false,
+2026-10-26T21:45:48.4134964Z   isCanceled: false,
+2026-10-26T21:45:48.4135198Z   killed: false,
+2026-10-26T21:45:48.4135410Z   signal: undefined
+2026-10-26T21:45:48.4135702Z }
+2026-10-26T21:45:48.4176718Z ##[error]Process completed with exit code 1.
+2026-10-26T21:45:48.4344659Z ##[group]Run rm -f /tmp/package-lock.json
+2026-10-26T21:45:48.4345056Z [36;1mrm -f /tmp/package-lock.json[0m

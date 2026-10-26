@@ -1,0 +1,51 @@
+{
+  "name": "@zuhairhalawa/ci-first-aid",
+  "version": "0.1.0",
+  "description": "Evidence-first GitHub Actions failure diagnosis CLI: turns huge CI logs into a concise, actionable root cause.",
+  "license": "MIT",
+  "author": "zuhairhalawa",
+  "type": "module",
+  "bin": {
+    "ci-first-aid": "dist/cli.js"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zuhairhalawa/CIFirstAid.git"
+  },
+  "bugs": {
+    "url": "https://github.com/zuhairhalawa/CIFirstAid/issues"
+  },
+  "homepage": "https://github.com/zuhairhalawa/CIFirstAid#readme",
+  "keywords": [
+    "github-actions",
+    "ci",
+    "cli",
+    "logs",
+    "diagnosis",
+    "debugging"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  }
+}

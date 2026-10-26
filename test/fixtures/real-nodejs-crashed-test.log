@@ -1,0 +1,39 @@
+2026-10-26T22:02:15.9300608Z ##[group]Run make test-ci -j1 V=1 TEST_CI_ARGS="-p actions --measure-flakiness 9"
+2026-10-26T22:02:15.9301389Z [36;1mmake test-ci -j1 V=1 TEST_CI_ARGS="-p actions --measure-flakiness 9"[0m
+2026-10-26T22:02:15.9341724Z shell: /usr/bin/bash -e {0}
+2026-10-26T22:02:15.9341950Z env:
+2026-10-26T22:02:15.9342120Z   PYTHON_VERSION: 3.15
+2026-10-26T22:02:15.9342329Z   FLAKY_TESTS: keep_retrying
+2026-10-26T22:02:15.9342537Z   CLANG_VERSION: 19
+2026-10-26T22:02:15.9342720Z   CC: sccache clang-19
+2026-10-26T22:02:15.9342913Z   CXX: sccache clang++-19
+2026-10-26T22:02:15.9343118Z   SCCACHE_GHA_ENABLED: true
+2026-10-26T22:03:53.7453770Z [ RUN      ] EnvironmentTest.StopFromExitHandlerDoesNotLeakIntoNextEnvironment
+2026-10-26T22:03:53.7900470Z /home/runner/work/node/node/node/out/Release/cctest:1
+2026-10-26T22:03:53.7900961Z throw new Error('uncaught')
+2026-10-26T22:03:53.7901184Z ^
+2026-10-26T22:03:53.7901272Z 
+2026-10-26T22:03:53.7901345Z Error: uncaught
+2026-10-26T22:03:53.7901594Z     at /home/runner/work/node/node/node/out/Release/cctest:1:7
+2026-10-26T22:03:53.7901951Z     at embedderRunCjs (node:internal/main/embedding:97:10)
+2026-10-26T22:03:53.7902863Z     at embedderRunEntryPoint (node:internal/main/embedding:175:12)
+2026-10-26T22:13:54.8904517Z ..................................................
+2026-10-26T22:13:59.2753066Z ..................................................
+2026-10-26T22:14:23.3953638Z ..................................................
+2026-10-26T22:14:57.3197817Z ..................................................
+2026-10-26T22:15:37.4673759Z ..................................................
+2026-10-26T22:15:45.2880696Z .........................
+2026-10-26T22:15:45.2882527Z === release test-inspector-connect-to-main-thread ===
+2026-10-26T22:15:45.2883323Z Path: parallel/test-inspector-connect-to-main-thread
+2026-10-26T22:15:45.2911401Z ##[error]Command: out/Release/node /home/runner/work/node/node/node/test/parallel/test-inspector-connect-to-main-thread.js
+--- CRASHED (Signal: 6) ---
+2026-10-26T22:15:45.2919733Z 
+2026-10-26T22:15:45.2919909Z ===
+2026-10-26T22:15:45.2920114Z === 1 tests failed
+2026-10-26T22:15:45.2920303Z === 1 tests CRASHED
+2026-10-26T22:15:45.2920476Z ===
+2026-10-26T22:15:45.2920565Z 
+2026-10-26T22:15:45.2920634Z Failed tests:
+2026-10-26T22:15:45.2921326Z out/Release/node /home/runner/work/node/node/node/test/parallel/test-inspector-connect-to-main-thread.js
+2026-10-26T22:15:45.3055428Z make: *** [Makefile:665: test-ci] Error 1
+2026-10-26T22:15:45.3068008Z ##[error]Process completed with exit code 2.

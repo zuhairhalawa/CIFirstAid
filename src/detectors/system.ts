@@ -1,0 +1,202 @@
+import { patternRule } from './rule.js';
+
+export const systemRules = [
+  // ---- missing executables ------------------------------------------------
+  patternRule({
+    id: 'command-not-found',
+    category: 'missing-executable',
+    score: 82,
+    patterns: [
+      /^(?:[^\s:]+: )?(?:line \d+: )?([^\s:]+): command not found$/,
+      /^(?:[^\s:]+: )?(?:\d+: )?([^\s:]+): not found$/,
+      /^which: no ([^\s:]+) in \(/,
+    ],
+    exclude: [/^(?:Module|File|Package|Cannot) not found/i],
+    title: (m) => 'Command not found: ' + (m[1] ?? ''),
+    explanation:
+      'The shell could not find that executable on PATH. It is not installed on the runner, was installed to a location not on PATH, or the step runs in a different shell/OS than expected.',
+    suggestions: [
+      'Install it in an earlier step (setup-* action, apt-get install, npm install -g) or call it via npx/its full path.',
+      'If the binary is a project dependency (e.g. eslint, tsc), run "npm ci" first and invoke it with npx / npm run.',
+      'Check runs-on and the step "shell:" - a command available on Linux may not exist on Windows runners.',
+    ],
+  }),
+  patternRule({
+    id: 'windows-not-recognized',
+    category: 'missing-executable',
+    score: 82,
+    patterns: [/^'?([^']+?)'? is not recognized as (?:an internal or external command|the name of a cmdlet)/],
+    title: (m) => 'Command not recognized: ' + (m[1] ?? ''),
+    explanation: 'Windows could not find that executable or cmdlet on PATH.',
+    suggestions: ['Install the tool in an earlier step or use its full path.', 'Check that the step shell (cmd / pwsh / bash) matches the syntax used.'],
+  }),
+  patternRule({
+    id: 'executable-not-found',
+    category: 'missing-executable',
+    score: 80,
+    patterns: [
+      /exec: "([^"]+)": executable file not found in [$]PATH/,
+      /Unable to locate executable file: (\S+)/,
+      /^Error: spawn (\S+) ENOENT/,
+      /spawn (\S+) ENOENT/,
+      /^[/]usr[/]bin[/]env: '([^']+)': No such file or directory/,
+    ],
+    title: (m) => 'Executable not found: ' + (m[1] ?? ''),
+    explanation: 'A program tried to launch an executable that is not installed or not on PATH.',
+    suggestions: ['Install the tool before this step, or add its directory to PATH (echo "dir" >> $GITHUB_PATH).'],
+  }),
+  // ---- missing environment variables ---------------------------------------
+  patternRule({
+    id: 'env-var-missing',
+    category: 'missing-env',
+    score: 80,
+    patterns: [
+      /(?:Missing|Required|Undefined|Unset)(?: required)? environment variable:? ['"`]?([A-Z][A-Z0-9_]{2,})/i,
+      /environment variable ['"`]?([A-Za-z][A-Za-z0-9_]{2,})['"`]? (?:is |was )?(?:not set|required|missing|undefined|not defined|must be set|is empty)/i,
+      /^(?:Error: )?['"`]?([A-Z][A-Z0-9_]{2,})['"`]? (?:environment variable )?(?:is|was) (?:not set|required|undefined|missing|not defined|empty)/,
+      /^[^\s:]*:? ?(?:line \d+: )?([A-Za-z_][A-Za-z0-9_]*): unbound variable$/,
+      /^Error: (?:The )?([A-Z][A-Z0-9_]{2,}) (?:env(?:ironment)? )?(?:var(?:iable)? )?is required/,
+    ],
+    title: (m) => 'Missing environment variable: ' + (m[1] ?? ''),
+    explanation:
+      'The program expected an environment variable that is not set in this job. In GitHub Actions this is usually a secret or variable that was never defined, is empty, or is unavailable (secrets are not passed to workflows triggered from forks).',
+    suggestions: [
+      'Define it under env: on the job/step, using a secrets.NAME or vars.NAME expression.',
+      'Check the secret exists in Settings > Secrets and variables (repository vs environment scope).',
+      'For pull requests from forks, secrets are not available; guard the step with an if: condition.',
+    ],
+  }),
+  patternRule({
+    id: 'python-keyerror-env',
+    category: 'missing-env',
+    score: 52,
+    patterns: [/^KeyError: ['"]([A-Z][A-Z0-9_]{2,})['"]$/],
+    title: (m) => 'Python KeyError for an upper-case key (likely an unset environment variable): ' + (m[1] ?? ''),
+    explanation: 'An all-caps key is missing from a dict; with os.environ[...] this means the environment variable is not set.',
+    suggestions: ['Check the traceback line: if it reads os.environ[...], define that variable on the job/step.'],
+    before: 1,
+  }),
+  // ---- permissions and authentication --------------------------------------
+  patternRule({
+    id: 'resource-not-accessible',
+    category: 'permission',
+    score: 90,
+    patterns: [/Resource not accessible by integration/, /Resource not accessible by personal access token/],
+    title: 'GitHub token lacks permission for this API call ("Resource not accessible by integration")',
+    explanation:
+      'The GITHUB_TOKEN used by the job does not have the permission this API call needs. Default token permissions may be read-only, and tokens in pull requests from forks and Dependabot runs are restricted.',
+    suggestions: [
+      'Add a permissions: block to the workflow/job granting only what is needed (e.g. contents: write, pull-requests: write, issues: write, packages: write).',
+      'Check Settings > Actions > General > Workflow permissions.',
+      'For fork pull requests the token is read-only by design; use a separate workflow_run/pull_request_target flow carefully.',
+    ],
+  }),
+  patternRule({
+    id: 'oidc-permission',
+    category: 'permission',
+    score: 90,
+    patterns: [/Unable to get ACTIONS_ID_TOKEN_REQUEST_URL env variable/, /Could not (?:load|get) (?:the )?OIDC token/i],
+    title: 'OIDC token unavailable: the job needs "id-token: write"',
+    explanation: 'The step requested an OpenID Connect token but the job was not granted the id-token permission.',
+    suggestions: ['Add "id-token: write" (and usually "contents: read") under the job permissions: block.'],
+  }),
+  patternRule({
+    id: 'git-push-denied',
+    category: 'permission',
+    score: 88,
+    patterns: [/^remote: Permission to (\S+) denied to (\S+)/, /^fatal: Authentication failed for/, /^fatal: could not read (?:Username|Password) for/, /^remote: Invalid username or password/, /^remote: Write access to repository not granted/],
+    title: (m) => 'Git authentication/permission denied' + (m[1] ? ' for ' + m[1] : ''),
+    explanation: 'git could not authenticate or is not allowed to write to the repository.',
+    suggestions: [
+      'For pushes: grant permissions: contents: write, or use a PAT/deploy key stored as a secret.',
+      'For other private repositories: actions/checkout needs a token with access (the default GITHUB_TOKEN only covers the current repo).',
+    ],
+  }),
+  patternRule({
+    id: 'ssh-denied',
+    category: 'permission',
+    score: 85,
+    patterns: [/Permission denied \((?:publickey|keyboard-interactive)/, /^Host key verification failed/],
+    title: 'SSH authentication failed',
+    explanation: 'The SSH key was rejected or the host key is not trusted.',
+    suggestions: ['Check the private key secret and that its public key is registered (deploy key / authorized_keys).', 'Add the host to known_hosts (ssh-keyscan) for first-time connections.'],
+  }),
+  patternRule({
+    id: 'dubious-ownership',
+    category: 'permission',
+    score: 84,
+    patterns: [/fatal: detected dubious ownership in repository at '(.+)'/],
+    title: (m) => 'git refuses a repository with different ownership: ' + (m[1] ?? ''),
+    explanation: 'Typical in container jobs: the checked-out workspace is owned by a different user than the one running git.',
+    suggestions: ['Run: git config --global --add safe.directory "$GITHUB_WORKSPACE" before the git command.'],
+  }),
+  patternRule({
+    id: 'bad-credentials',
+    category: 'permission',
+    score: 82,
+    patterns: [/(?:\bBad credentials\b)/, /Credentials could not be loaded/, /not authorized to perform: [\w:*]+/, /Could not assume role with OIDC/, /AccessDenied/, /Error: Not authenticated/i],
+    title: (m) => (/Bad credentials/.test(m[0]) ? 'GitHub API rejected the token ("Bad credentials")' : 'Cloud credentials rejected or missing: ' + m[0].slice(0, 100)),
+    explanation: 'The credentials supplied to this step are missing, expired, malformed or not allowed to perform the action.',
+    suggestions: ['Check the secret value is set and not expired; secrets are empty for fork pull requests.', 'For cloud roles check the trust policy / IAM permissions for the role used.'],
+  }),
+  patternRule({
+    id: 'http-401-403',
+    category: 'permission',
+    score: 62,
+    patterns: [
+      /(?:HTTP(?:[/][\d.]+)?|status(?: code)?:?|error:?|returned error:?) (401|403)(?:\b)/i,
+      /(?:\b(401 Unauthorized|403 Forbidden)\b)/,
+    ],
+    exclude: [/rate limit/i],
+    title: (m) => 'HTTP ' + (m[1] ?? m[0]) + ' authorization failure',
+    explanation: 'A server rejected the request as unauthenticated (401) or forbidden (403).',
+    suggestions: ['Check the token/credentials used by this request and its scopes.', 'If this is a GitHub API 403, check workflow permissions and whether you hit a rate limit.'],
+    before: 1,
+  }),
+  patternRule({
+    id: 'registry-denied',
+    category: 'permission',
+    score: 84,
+    patterns: [
+      /^denied: (?:requested access to the resource is denied|installation not allowed|permission_denied)/,
+      /unauthorized: (?:authentication required|incorrect username or password)/,
+      /Cannot perform an interactive login from a non TTY device/,
+      /Error response from daemon: .*(?:unauthorized|denied)/,
+    ],
+    title: 'Container registry denied access',
+    explanation: 'The push/pull was rejected: not logged in, the token lacks package permission, or the repository path/name is wrong.',
+    suggestions: [
+      'Add a login step before the push (docker/login-action) with the right credentials.',
+      'For ghcr.io grant permissions: packages: write and use the correct lower-case owner/name.',
+    ],
+  }),
+  patternRule({
+    id: 'file-permission-denied',
+    category: 'permission',
+    score: 82,
+    patterns: [
+      /^(?:[^\s:]+: )?(?:line \d+: )?([^\s:]+): Permission denied$/,
+      /EACCES: permission denied, (?:\w+) '([^']+)'/,
+      /^Error: EACCES: permission denied/,
+    ],
+    title: (m) => 'Permission denied' + (m[1] ? ': ' + m[1] : ''),
+    explanation: 'The file is not executable, or the process may not read/write that path.',
+    suggestions: [
+      'For scripts: git update-index --chmod=+x <file> (commit it) or run chmod +x before executing.',
+      'For global npm installs or system paths: avoid sudo-less writes to protected directories; use a local prefix or sudo.',
+    ],
+  }),
+  // ---- disk -------------------------------------------------------------
+  patternRule({
+    id: 'disk-full',
+    category: 'disk',
+    score: 86,
+    patterns: [/No space left on device/, /(?:\bENOSPC\b)/, /write error: No space left/, /Disk quota exceeded/],
+    title: 'The runner ran out of disk space',
+    explanation: 'The job filled the runner disk (large build outputs, docker layers, caches, node_modules, artifacts).',
+    suggestions: [
+      'Free space early in the job: remove unused preinstalled toolchains or prune docker images.',
+      'Reduce what is built/cached/downloaded, or use a larger runner.',
+    ],
+  }),
+];
