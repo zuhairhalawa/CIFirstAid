@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { GitHubClient, GitHubError, apiBaseFor, parseRemoteUrl, parseRepoArg, resolveToken } from '../src/github.js';
+import { GitHubClient, GitHubError, apiBaseFor, isValidHost, parseRemoteUrl, parseRepoArg, resolveToken } from '../src/github.js';
 import { diagnoseRun } from '../src/run.js';
 import { ghLog } from './helpers.js';
 
@@ -46,6 +46,18 @@ describe('repo parsing', () => {
   it('prefers environment tokens', async () => {
     expect((await resolveToken('github.com', { GH_TOKEN: 'a', GITHUB_TOKEN: 'b' })).token).toBe('a');
     expect((await resolveToken('github.com', { GITHUB_TOKEN: 'b' })).token).toBe('b');
+  });
+  it('never offers a github.com token to another host', async () => {
+    expect((await resolveToken('ghe.example.com', { GH_TOKEN: 'a', GITHUB_TOKEN: 'b' })).token).toBeUndefined();
+    expect((await resolveToken('ghe.example.com', { GH_TOKEN: 'a', GH_ENTERPRISE_TOKEN: 'e' })).token).toBe('e');
+  });
+  it('rejects hosts that could alter the URL or look like flags', async () => {
+    for (const h of ['evil.com/x', 'a@evil.com', '-x', 'evil.com?x=1', 'a b', '']) {
+      expect(isValidHost(h)).toBe(false);
+      expect((await resolveToken(h, { GH_TOKEN: 'a', GH_ENTERPRISE_TOKEN: 'e' })).token).toBeUndefined();
+    }
+    expect(isValidHost('ghe.example.com')).toBe(true);
+    expect(isValidHost('ghe.example.com:8443')).toBe(true);
   });
 });
 

@@ -10,14 +10,18 @@ permissions:
 
 jobs:
   test:
+    name: ${{ matrix.os }} / node ${{ matrix.node }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
-        node: [20, 22]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node: [20, 22, 24]
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
@@ -26,5 +30,8 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
-      - name: Smoke test the built CLI
-        run: node dist/cli.js analyze test/fixtures/real-github-graphql-error.log --json
+      # Packs the project, checks the tarball contents, installs it into a temp project outside
+      # the workspace and runs the installed `ci-first-aid` executable (--version, --help,
+      # analyze, --json, exit codes).
+      - name: Verify the installed package
+        run: npm run verify:package

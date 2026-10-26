@@ -30,7 +30,7 @@ export function stripAnsi(s: string): string {
 }
 
 export interface NormalizeOptions {
-  /** Hard cap on lines kept, to bound memory on pathological inputs. */
+  /** Hard cap on lines kept (the last ones), to bound memory on pathological inputs. */
   maxLines?: number;
 }
 
@@ -61,11 +61,11 @@ export function normalizeLog(input: string, opts: NormalizeOptions = {}): Normal
   let inRunBlock = false;
   let truncated = false;
 
-  for (let i = 0; i < rawLines.length; i++) {
-    if (lines.length >= maxLines) {
-      truncated = true;
-      break;
-    }
+  // Failures are reported at the end of a log, so when the input is too large keep the tail
+  // (line numbers stay those of the original input).
+  const start = Math.max(0, rawLines.length - maxLines);
+  if (start > 0) truncated = true;
+  for (let i = start; i < rawLines.length; i++) {
     const raw = rawLines[i] ?? '';
     let rest = raw;
     let timestamp: string | undefined;

@@ -59,10 +59,19 @@ export async function repoFromGitRemote(): Promise<RepoRef | null> {
   return r.ok ? parseRemoteUrl(r.stdout) : null;
 }
 
-/** Token precedence mirrors gh: GH_TOKEN / GITHUB_TOKEN, then the gh CLI credential store. */
+/** A bare DNS name or IPv4 address with an optional port. Rejects anything that could alter the URL or look like a CLI flag. */
+export function isValidHost(host: string): boolean {
+  return /^[A-Za-z0-9](?:[A-Za-z0-9.-]*[A-Za-z0-9])?(?::\d{1,5})?$/.test(host);
+}
+
+/**
+ * Token precedence mirrors gh: GH_TOKEN / GITHUB_TOKEN for github.com only; GH_ENTERPRISE_TOKEN /
+ * GITHUB_ENTERPRISE_TOKEN for any other host; then the gh CLI credential store.
+ * A github.com token is never offered to another host (a run URL or --hostname may be attacker-chosen).
+ */
 export async function resolveToken(host: string, env: NodeJS.ProcessEnv = process.env): Promise<{ token?: string; source: string }> {
-  const fromEnv =
-    host === 'github.com' ? env['GH_TOKEN'] || env['GITHUB_TOKEN'] : env['GH_ENTERPRISE_TOKEN'] || env['GITHUB_ENTERPRISE_TOKEN'] || env['GH_TOKEN'] || env['GITHUB_TOKEN'];
+  if (!isValidHost(host)) return { source: 'none' };
+  const fromEnv = host === 'github.com' ? env['GH_TOKEN'] || env['GITHUB_TOKEN'] : env['GH_ENTERPRISE_TOKEN'] || env['GITHUB_ENTERPRISE_TOKEN'];
   if (fromEnv) return { token: fromEnv, source: 'environment' };
   const r = await exec('gh', ['auth', 'token', '--hostname', host]);
   const t = r.stdout.trim();

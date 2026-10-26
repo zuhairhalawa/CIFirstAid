@@ -48,12 +48,11 @@ describe('normalizeLog', () => {
     expect(lines[1]!.buildkit).toBeUndefined();
   });
 
-  it('caps the number of lines kept', () => {
+  it('caps the number of lines kept, keeping the tail with original line numbers', () => {
     const { lines, stats } = normalizeLog('a\nb\nc\nd\n', { maxLines: 2 });
-    expect(lines.length).toBe(2);
+    expect(lines.map((l) => [l.n, l.text])).toEqual([[3, 'c'], [4, 'd']]);
     expect(stats.truncated).toBe(true);
-  });
-});
+  });});
 
 describe('decodeLog', () => {
   it('decodes UTF-16LE with BOM (PowerShell redirection)', () => {

@@ -9,6 +9,7 @@ import {
   GitHubClient,
   GitHubError,
   apiBaseFor,
+  isValidHost,
   parseRemoteUrl,
   parseRepoArg,
   repoFromGitRemote,
@@ -55,6 +56,7 @@ const HELP = [
   '      --max-jobs <n>              Maximum failed jobs to analyze (default 10)',
   '      --include-cancelled         Also diagnose cancelled jobs when other jobs failed',
   '      --hostname <host>           GitHub Enterprise host (default: github.com or GH_HOST)',
+  '                                  (token: GH_ENTERPRISE_TOKEN or gh auth login)',
   '',
   'Common options:',
   '      --json                      Machine-readable output',
@@ -145,6 +147,7 @@ async function cmdRun(args: string[], values: Record<string, string | boolean | 
   if (!repo) repo = await (io.detectRepo ?? repoFromGitRemote)();
   if (!repo) throw new UsageError('Could not determine the repository. Pass --repo OWNER/REPO (or run inside a clone with an "origin" remote).');
   if (hostOpt && !repoOpt && !target.repo) repo = { ...repo, host: hostOpt };
+  if (!isValidHost(repo.host)) throw new UsageError('Invalid GitHub host "' + repo.host + '".');
 
   const attempt = positiveInt(values['attempt'] as string | undefined, 'attempt') ?? target.attempt;
   const jobId = positiveInt(values['job'] as string | undefined, 'job') ?? target.jobId;

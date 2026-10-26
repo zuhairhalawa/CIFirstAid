@@ -192,6 +192,12 @@ describe('run', () => {
     expect(t.err()).toContain('gh auth login');
   });
 
+  it('rejects a malformed host in a run URL as a usage error', async () => {
+    const t = makeIO({ makeClient: () => fakeClient(routes) });
+    expect(await main(['run', 'https://a@evil.example/o/r/actions/runs/77'], t.io)).toBe(2);
+    expect(t.err()).toContain('Invalid GitHub host');
+  });
+
   it('reports a missing run', async () => {
     const t = makeIO({ makeClient: () => fakeClient({}) });
     expect(await main(['run', '99', '--repo', 'o/r'], t.io)).toBe(1);

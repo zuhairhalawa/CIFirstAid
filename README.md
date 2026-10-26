@@ -81,7 +81,7 @@ ci-first-aid run 1234567890 --repo owner/repo --attempt 2 --json
 | `--hostname HOST` | GitHub Enterprise Server host (`GH_HOST` also works). |
 | `--json`, `--no-color` | Output control. |
 
-**Authentication:** `GH_TOKEN` / `GITHUB_TOKEN`, otherwise the token from your existing `gh auth login` (via `gh auth token`). The token needs read access to Actions (classic `repo` scope, or fine-grained *Actions: Read*).
+**Authentication:** for github.com, `GH_TOKEN` / `GITHUB_TOKEN`; for GitHub Enterprise hosts, `GH_ENTERPRISE_TOKEN` / `GITHUB_ENTERPRISE_TOKEN`. Otherwise the token from your existing `gh auth login` (via `gh auth token`). A github.com token is never sent to another host. The token needs read access to Actions (classic `repo` scope, or fine-grained *Actions: Read*).
 
 **What it calls** (all `GET`): the run (`/actions/runs/{id}` or `/attempts/{n}`), its jobs (`/actions/runs/{id}/attempts/{n}/jobs`, paginated), each failed job's log (`/actions/jobs/{id}/logs`, which answers with a redirect to a signed storage URL that is followed *without* your token), and, only when a log is unavailable, check-run annotations. It never reruns, cancels, deletes or modifies anything; the client class has no non-GET code path and the test suite asserts it.
 
@@ -144,6 +144,7 @@ For `run`, the document has `run` with `jobs[]` (each with `failedSteps`, `logSo
 
 - Detection is pattern-based. Confidence reflects how specific the evidence is; `low` means "best lead", not "cause". If a failure type is unknown, you get the runner-flagged lines and surrounding output, not an invented answer.
 - Evidence line numbers refer to the log as downloaded (including GitHub's setup lines).
+- Oversized input is bounded, not rejected: for local files only the last 2,000,000 lines are analyzed (line numbers still refer to the original file, and the output says "input truncated"). Failures are normally at the end of a log.
 - Logs are retained by GitHub for a limited time; expired logs fall back to annotations, which are much less detailed.
 - Workflows that fail before any job starts have no log in the API.
 - Redaction is best-effort pattern matching for common token formats on top of GitHub's own `***` masking.
