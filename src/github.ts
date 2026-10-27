@@ -64,18 +64,30 @@ export function isValidHost(host: string): boolean {
   return /^[A-Za-z0-9](?:[A-Za-z0-9.-]*[A-Za-z0-9])?(?::\d{1,5})?$/.test(host);
 }
 
+/** Looks up a token for a validated host in the gh credential store. Injectable so tests never spawn a real gh process. */
+export type GhTokenLookup = (host: string) => Promise<string | undefined>;
+
+/** Production lookup: `gh auth token --hostname HOST` (execFile, no shell). */
+export async function ghAuthToken(host: string): Promise<string | undefined> {
+  const r = await exec('gh', ['auth', 'token', '--hostname', host]);
+  return r.ok ? r.stdout : undefined;
+}
+
 /**
  * Token precedence mirrors gh: GH_TOKEN / GITHUB_TOKEN for github.com only; GH_ENTERPRISE_TOKEN /
  * GITHUB_ENTERPRISE_TOKEN for any other host; then the gh CLI credential store.
  * A github.com token is never offered to another host (a run URL or --hostname may be attacker-chosen).
  */
-export async function resolveToken(host: string, env: NodeJS.ProcessEnv = process.env): Promise<{ token?: string; source: string }> {
+export async function resolveToken(
+  host: string,
+  env: NodeJS.ProcessEnv = process.env,
+  lookup: GhTokenLookup = ghAuthToken,
+): Promise<{ token?: string; source: string }> {
   if (!isValidHost(host)) return { source: 'none' };
   const fromEnv = host === 'github.com' ? env['GH_TOKEN'] || env['GITHUB_TOKEN'] : env['GH_ENTERPRISE_TOKEN'] || env['GITHUB_ENTERPRISE_TOKEN'];
   if (fromEnv) return { token: fromEnv, source: 'environment' };
-  const r = await exec('gh', ['auth', 'token', '--hostname', host]);
-  const t = r.stdout.trim();
-  if (r.ok && t) return { token: t, source: 'gh auth token' };
+  const t = (await lookup(host))?.trim();
+  if (t) return { token: t, source: 'gh auth token' };
   return { source: 'none' };
 }
 

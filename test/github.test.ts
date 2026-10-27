@@ -1,7 +1,13 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { GitHubClient, GitHubError, apiBaseFor, isValidHost, parseRemoteUrl, parseRepoArg, resolveToken } from '../src/github.js';
 import { diagnoseRun } from '../src/run.js';
 import { ghLog } from './helpers.js';
+
+/** A credential-store lookup that fails the test if it is ever consulted. Never spawns gh. */
+const noLookup = () =>
+  vi.fn(async (_host: string): Promise<string | undefined> => {
+    throw new Error('credential store must not be consulted');
+  });
 
 type Handler = (url: URL, init: RequestInit) => Response | Promise<Response>;
 
@@ -44,18 +50,47 @@ describe('repo parsing', () => {
     expect(apiBaseFor('ghe.example.com')).toBe('https://ghe.example.com/api/v3');
   });
   it('prefers environment tokens', async () => {
-    expect((await resolveToken('github.com', { GH_TOKEN: 'a', GITHUB_TOKEN: 'b' })).token).toBe('a');
-    expect((await resolveToken('github.com', { GITHUB_TOKEN: 'b' })).token).toBe('b');
+    const lookup = noLookup();
+    expect((await resolveToken('github.com', { GH_TOKEN: 'a', GITHUB_TOKEN: 'b' }, lookup)).token).toBe('a');
+    expect((await resolveToken('github.com', { GITHUB_TOKEN: 'b' }, lookup)).token).toBe('b');
+    expect(lookup).not.toHaveBeenCalled();
   });
   it('never offers a github.com token to another host', async () => {
-    expect((await resolveToken('ghe.example.com', { GH_TOKEN: 'a', GITHUB_TOKEN: 'b' })).token).toBeUndefined();
-    expect((await resolveToken('ghe.example.com', { GH_TOKEN: 'a', GH_ENTERPRISE_TOKEN: 'e' })).token).toBe('e');
+    const lookup = vi.fn(async (_host: string): Promise<string | undefined> => undefined);
+    const r = await resolveToken('ghe.example.com', { GH_TOKEN: 'a', GITHUB_TOKEN: 'b' }, lookup);
+    expect(r).toEqual({ source: 'none' });
+    // The only thing consulted for another host is the credential store for THAT host.
+    expect(lookup).toHaveBeenCalledTimes(1);
+    expect(lookup).toHaveBeenCalledWith('ghe.example.com');
+  });
+  it('selects enterprise tokens for other hosts', async () => {
+    const lookup = noLookup();
+    expect(await resolveToken('ghe.example.com', { GH_TOKEN: 'a', GH_ENTERPRISE_TOKEN: 'e' }, lookup)).toEqual({ token: 'e', source: 'environment' });
+    expect((await resolveToken('ghe.example.com', { GITHUB_ENTERPRISE_TOKEN: 'e2' }, lookup)).token).toBe('e2');
+    expect((await resolveToken('ghe.example.com', { GH_ENTERPRISE_TOKEN: 'e', GITHUB_ENTERPRISE_TOKEN: 'e2' }, lookup)).token).toBe('e');
+    expect(lookup).not.toHaveBeenCalled();
+  });
+  it('does not use enterprise tokens for github.com', async () => {
+    const lookup = vi.fn(async (_host: string): Promise<string | undefined> => undefined);
+    expect((await resolveToken('github.com', { GH_ENTERPRISE_TOKEN: 'e' }, lookup)).token).toBeUndefined();
+    expect(lookup).toHaveBeenCalledWith('github.com');
+  });
+  it('falls back to the gh credential store for the requested host', async () => {
+    const lookup = vi.fn(async (_host: string): Promise<string | undefined> => 'stored-token\n');
+    expect(await resolveToken('ghe.example.com', {}, lookup)).toEqual({ token: 'stored-token', source: 'gh auth token' });
+    expect(lookup).toHaveBeenCalledWith('ghe.example.com');
+  });
+  it('treats an empty or failed credential store lookup as no credentials', async () => {
+    expect(await resolveToken('ghe.example.com', {}, async () => '  \n')).toEqual({ source: 'none' });
+    expect(await resolveToken('ghe.example.com', {}, async () => undefined)).toEqual({ source: 'none' });
   });
   it('rejects hosts that could alter the URL or look like flags', async () => {
+    const lookup = noLookup();
     for (const h of ['evil.com/x', 'a@evil.com', '-x', 'evil.com?x=1', 'a b', '']) {
       expect(isValidHost(h)).toBe(false);
-      expect((await resolveToken(h, { GH_TOKEN: 'a', GH_ENTERPRISE_TOKEN: 'e' })).token).toBeUndefined();
+      expect((await resolveToken(h, { GH_TOKEN: 'a', GH_ENTERPRISE_TOKEN: 'e' }, lookup)).token).toBeUndefined();
     }
+    expect(lookup).not.toHaveBeenCalled();
     expect(isValidHost('ghe.example.com')).toBe(true);
     expect(isValidHost('ghe.example.com:8443')).toBe(true);
   });
