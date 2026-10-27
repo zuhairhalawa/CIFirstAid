@@ -2,6 +2,46 @@
 
 **Evidence-first diagnosis of failed GitHub Actions runs.** Point it at a huge log (or a run ID) and get the most likely root cause, the exact log lines that prove it, and what to try next.
 
+<p align="center">
+  <img src="docs/assets/ci-first-aid-diagnosis-demo.gif" alt="Animated terminal demo: ci-first-aid analyzes a real failed Next.js CI log from the public regression fixture. It reports the Jest assertion failures as the high-confidence root cause, with line-numbered evidence, and lists the generic 'A step failed with exit code 1' message last as low priority. The command exits with code 0." width="880">
+</p>
+
+<sub>Real output from the local CLI (v0.1.0) on the public regression fixture `test/fixtures/real-nextjs-jest-failure.log`, a failed Next.js CI log. Recorded 2026-10-27 from a local checkout after `npm run build`. The command exits with code 0 because a diagnosis was produced; the CI run in the log is what failed.</sub>
+
+<details>
+<summary>Text transcript of the demo</summary>
+
+```text
+$ node dist/cli.js analyze test/fixtures/real-nextjs-jest-failure.log
+CIFirstAid - test/fixtures/real-nextjs-jest-failure.log
+
+ROOT CAUSE [high confidence, test]
+Jest: 2 tests failed
+Evidence:
+  L26    ● server-reference-tree-shaking › tree shakes dependencies of an unused export containing an inline use-server function
+  L28      expect(received).toBe(expected) // Object.is equality
+  L30      Expected: false
+  L31      Received: true
+  L43    ● server-reference-tree-shaking › tree shakes dependencies of an unused export containing an inline use-cache function
+  L52  Tests:       2 failed, 2 passed, 4 total
+Why: The test runner reported failing tests. The assertion details above are the concrete cause; the later "npm ERR!" / exit-code lines are only consequences.
+Try:
+  1. Run just the failing test locally to reproduce, e.g. npx jest <file>.
+  2. If it passes locally, compare Node version, environment variables, timezone/locale and test ordering with the CI job.
+  3. Check whether the failure is timing-dependent (flaky) by re-running only the failed test.
+
+Also found (lower priority; may be consequences of the above):
+  - [medium] Uncaught Error: Command failed with exit code 1 (EPERM): node run-tests.js --retries 0 --runs 3 test/e2e/app-dir/server-reference-tree-shaking/server-reference-  (L64)
+  - [low] Missing environment variable: XDG_DATA_DIRS  (L6)
+  - [low] A step failed with exit code 1  (L77)
+
+Log: 82 lines | GitHub Actions format | timestamps removed | ANSI stripped | 1 error annotation(s)
+$ echo $?
+0
+```
+
+</details>
+
 ```text
 $ ci-first-aid analyze failed.log        # abridged output from a real vercel/next.js failure
 
